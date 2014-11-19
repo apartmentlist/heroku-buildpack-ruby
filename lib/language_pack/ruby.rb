@@ -484,7 +484,7 @@ WARNING
         else
           # using --deployment is preferred if we can
           bundle_command += " --deployment"
-          cache.load ".bundle"
+          # cache.load ".bundle"
         end
 
         topic("Installing dependencies using #{bundler.version}")

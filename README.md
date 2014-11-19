@@ -1,7 +1,34 @@
 Heroku buildpack: Ruby
 ======================
 
-This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks) for Ruby, Rack, and Rails apps. It uses [Bundler](http://gembundler.com) for dependency management.
+This is a fork of the
+[Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks)
+for Ruby, Rack, and Rails apps. It uses
+[Bundler](http://gembundler.com) for dependency management.
+
+Why the Fork?
+-------------
+
+The reason for this fork is due to a bug in Bundler, which causes the
+bundler config to get rewritten on every deploy in such a way that
+multi-line environment variables, such as those used by the
+heroku-buildpack-rgeo, have the number of quotes in them double.  This
+leads to 2^n expansion in size of the `.bundle/config` file, so we can
+only go for about 25-26 deploys before we can no longer deploy the
+app.
+
+The patch for this behavior is to use the `heroku repo` extension and
+issue a `heroku repo:purge_cache` directive to reset the state of the
+cached `.bundle/config`.  A more permanant fix is to modify this
+buildpack to not cache the file at all.  The 'correct' fix would be to
+have Bundler avoid the use of regular expressions to parse YAML for a
+small gain in performance.
+
+A minimal example of the bug is in this gist:
+https://gist.github.com/rpdillon/8e7c40213e4dabd453b3
+
+The issue with Bundler was reported here:
+https://github.com/bundler/bundler/issues/3261
 
 Usage
 -----
@@ -189,4 +216,3 @@ Rails 3 (config/application.rb is detected)
 * everything from Rails 2
 * install rails 3 plugins
   * [rails3_server_static_assets](https://github.com/pedro/rails3_serve_static_assets)
-
